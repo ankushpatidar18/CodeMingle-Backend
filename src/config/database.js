@@ -4,7 +4,7 @@
 
  //connect to cluster
 const connectDB = async ()=>{
-    await mongoose.connect('mongodb+srv://ankushpatidar18:3RKGJoEm1iY3GkFK@learningmongo.u03ac.mongodb.net/')
+    await mongoose.connect(process.env.MONGO_URI)
  }
 
  module.exports = connectDB;

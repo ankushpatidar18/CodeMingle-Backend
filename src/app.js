@@ -5,6 +5,10 @@
 //requiring database so that first db connect then server listen
 const connectDB = require("./config/database")
 
+//for process.env to secure cluster uri
+require('dotenv').config();
+
+
 //creating webserver through express.js
 const express = require("express");
 const app = express();
