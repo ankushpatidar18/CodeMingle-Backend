@@ -5,6 +5,9 @@
 //requiring database so that first db connect then server listen
 const connectDB = require("./config/database");
 
+//for encrypting password
+const bcrypt = require("bcrypt")
+
 //for process.env to secure cluster uri
 require("dotenv").config();
 
@@ -17,34 +20,58 @@ const app = express();
 //middleware for read the json and convert into javascript object
 app.use(express.json());
 
+//for user login
+app.get("/login",async (req,res)=>{
+ try{
+  const {emailId,password} = req.body;
+  const isUser = await User.findOne({emailId : emailId});
+ 
+  if(isUser){
+    const passwordHash = isUser.password;
+    const validateUser = await bcrypt.compare(password, passwordHash)
+    if(validateUser){
+      res.status(200).json({message : "User is valid",isUser})
+     }else{
+      throw new Error("invalid credentials")
+     }
+  }else{
+    throw new Error("invalid credentials")
+
+  }
+ }catch(err){
+  res.status(400).send("ERROR" + err.message)
+ }
+
+})
+
+
+
+
+//for updating user detail
 app.patch("/user", async (req, res) => {
-    try {
-      const NOT_ALLOWED_UPDATES = [
-        "emailId",
-        "firstName",
-        "lastName",
-        "password",
-        "age",
-        "gender",
-      ];
-      const keys_arr = Object.keys(req.body);
-      const not_allowed = keys_arr.some((ele) => NOT_ALLOWED_UPDATES.includes(ele));
-      const data = req.body;
-      const id = req.body.id;
-  
-      if (!id) {
-        return res.status(400).json({ message: "User  ID is required" });
-      }
-      if (!not_allowed) {
-        await User.findByIdAndUpdate(id, data, { runValidators: true });
-        return res.status(200).json({ message: "Updated Successfully" });
-      } else {
-        return res.status(400).json({ message: "These attributes cannot be updated" });
-      }
-    } catch (err) {
-      return res.status(500).json({ message: "Problem in updating: " + err.message });
+  try {
+    const NOT_ALLOWED_UPDATES = ["emailId","age", "gender"];
+    const keysArr = Object.keys(req.body);
+    const notAllowed = keysArr.filter((key) => NOT_ALLOWED_UPDATES.includes(key));
+
+    const id = req.body.id;
+    const data = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "User ID is required" });
     }
-  });
+    if (notAllowed.length > 0) {
+      return res.status(400).json({ message: `These attributes cannot be updated: ${notAllowed.join(", ")}` });
+    }
+
+    await User.findByIdAndUpdate(id, data, { runValidators: true });
+    return res.status(200).json({ message: "Updated Successfully" });
+
+  } catch (err) {
+    return res.status(500).json({ message: "Problem in updating: " + err.message });
+  }
+});
+
   
   app.delete("/user", async (req, res) => {
     const userId = req.body.id;
@@ -78,8 +105,24 @@ app.get("/feed", async (req, res) => {
 
 //middleware for adding user
 app.post("/signup", async (req, res) => {
+  const {emailId,firstName,lastName,password,age,gender}= req.body;
+  //validation of data(done in schema)
+
+  //encrypt the password(npm bcrypt)
+  const passwordHash = await bcrypt.hash(password,10);
+  
+
+
+
   //creating a new instance of model
-  const user = new User(req.body);
+  const user = new User({
+    firstName,
+    lastName,
+    emailId,
+    password : passwordHash,
+    age,
+    gender
+  });
 
   try {
     //returns a promise

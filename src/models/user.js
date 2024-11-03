@@ -8,10 +8,13 @@ const userSchema = new mongoose.Schema({
     firstName : {
         type : String,
         required : true,
-
+        minLength : 1,
+        maxLength : 20,
     },
     lastName : {
         type : String,
+        minLength : 1,
+        maxLength : 20,
     },
     emailId : {
         type : String,
@@ -19,6 +22,7 @@ const userSchema = new mongoose.Schema({
         required : true,
         unique : true,
         trim :true,
+        immutable:true,
         validate: {
             //you can also use npm validator
             validator: function (value) {
@@ -39,15 +43,13 @@ const userSchema = new mongoose.Schema({
     age : {
         type : Number,
         min : 12,
+        max : 100,
+        immutable:true,
     },
     gender : {
         type : String,
-        validate(value){
-            if(!["male","female","other"].includes(value))
-            {
-                throw new Error("gender is not valid");
-            }
-        }
+        immutable:true,
+        enum : ["male","female","other"],
     },
     photoUrl : {
         type : String,
@@ -61,6 +63,8 @@ const userSchema = new mongoose.Schema({
     },
     about : {
         type : String,
+        minLength:1,
+        maxLength : 50,
         default : "Write about yourself here!"
     },
     skills: {
