@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const npm_validator = require("validator")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 //1.creating user attributes
 //2.adding validation
@@ -78,6 +80,21 @@ const userSchema = new mongoose.Schema({
     }
 
 },{timestamps : true})
+
+//creating a helper method for validating password
+userSchema.methods.validatePassword = async function (password){
+    const dbPassword = this.password;
+    const isPasswordValid = await bcrypt.compare(password, dbPassword);
+    return isPasswordValid;
+
+}
+
+//creating a helper method for user to generate jwt token
+userSchema.methods.getJWT = async function (){
+    const user = this;
+    const token = await jwt.sign({_id : user._id},"CODE@Mingle$$",{expiresIn : "7d"})
+    return token;
+}
 
 const User = mongoose.model('User', userSchema);
 
