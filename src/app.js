@@ -6,10 +6,8 @@
 const connectDB = require("./config/database");
 
 const jwt = require("jsonwebtoken");
-const {userAuth}= require("./middlewares/auth")
 
-//for encrypting password
-const bcrypt = require("bcrypt")
+
 
 //for process.env to secure cluster uri
 require("dotenv").config();
@@ -27,52 +25,20 @@ app.use(express.json());
 const cookieParser = require("cookie-parser")
 app.use(cookieParser())
 
-//for user profile after login
+const authRouter = require("./routes/auth");
+const profileRouter =  require("./routes/profile");
+const requestRouter =  require("./routes/request");
 
-app.get("/profile",userAuth,async (req,res)=>{
-  try{
-  const user =req.user;
-  res.send(user);
-  }catch(err){
-    res.status(400).send("ERR" + err.message);
-  }
-})
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestRouter);
 
 
 
 
 
-//for user login
-app.post("/login",async (req,res)=>{
- try{
-  const {emailId,password} = req.body;
-  const user = await User.findOne({emailId : emailId});
- 
-  if(user){
-    const validateUser = await user.validatePassword(password)
-    if(validateUser){
-      //create a jwt token
-      const token = await user.getJWT();
 
 
-      //add the token to cookie and send back to user
-      res.cookie("token",token,{expires :new Date(Date.now() + 8*3600000)})
-
-
-
-      res.status(200).json("User is valid")
-     }else{
-      throw new Error("invalid credentials")
-     }
-  }else{
-    throw new Error("invalid credentials")
-
-  }
- }catch(err){
-  res.status(400).send("ERROR" + err.message)
- }
-
-})
 
 
 
@@ -133,36 +99,7 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-//middleware for adding user
-app.post("/signup", async (req, res) => {
-  const {emailId,firstName,lastName,password,age,gender,skills}= req.body;
-  //validation of data(done in schema)
 
-  //encrypt the password(npm bcrypt)
-  const passwordHash = await bcrypt.hash(password,10);
-  
-
-
-
-  //creating a new instance of model
-  const user = new User({
-    firstName,
-    lastName,
-    emailId,
-    password : passwordHash,
-    age,
-    gender,
-    skills
-  });
-
-  try {
-    //returns a promise
-    await user.save();
-    res.send("User created successfully");
-  } catch (err) {
-    res.status(400).send("User is not Created because of " + err.message);
-  }
-});
 
 connectDB()
   .then(() => {
