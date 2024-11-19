@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
     gender : {
         type : String,
         immutable:true,
-        enum : ["male","female","other"],
+        enum : ["male","female","other"], 
     },
     photoUrl : {
         type : String,
