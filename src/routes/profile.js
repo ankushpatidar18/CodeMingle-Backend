@@ -23,16 +23,23 @@ profileRouter.patch("/profile/edit",userAuth,async (req,res)=>{
     const user = req.user;
     const NOT_ALLOWED_UPDATES = ["emailId","password"];
     const key_arr = Object.keys(req.body);
-
+   //to do : know which field is not valid
     const isNotValid = NOT_ALLOWED_UPDATES.some((ele)=> key_arr.includes(ele));
     if(isNotValid){
       throw new Error("This information can not be updated");
     }
     
-    key_arr.forEach((ele)=> user[ele] = req.body[ele])
+    key_arr.forEach((ele)=>{
+      if(req.body[ele]!= undefined)
+        user[ele] = req.body[ele]
+      else{
+        throw new Error("Please fill all the fields");
+      }
+    })
+
     await user.save();
     
-    res.send("updated successfully");
+    res.json({message : "updated successfully", data : user});
   }catch(err){
     res.status(400).send("ERR " + err.message)
   }

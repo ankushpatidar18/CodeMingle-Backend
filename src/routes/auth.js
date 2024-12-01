@@ -43,37 +43,45 @@ authRouter.post("/signup", async (req, res) => {
   });
 
   //for user login
-authRouter.post("/login",async (req,res)=>{
-    try{
-     const {emailId,password} = req.body;
-     const user = await User.findOne({emailId : emailId});
-    
-     if(user){
-       const isUser = await user.validatePassword(password)
-       if(isUser){
-         //create a jwt token
+  authRouter.post("/login", async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
+        
+        // Validate input
+        if (!emailId || !password) {
+            return res.status(400).json({ 
+                message: "Email and password are required" 
+            });
+        }
+
+        // Find user and explicitly select password for validation
+        const user = await User.findOne({ emailId }).select('+password');
+        
+        if (!user) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        
+        const isValidPassword = await user.validatePassword(password);
+        
+        if (!isValidPassword) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }else{
+          //create a jwt token
          const token = await user.getJWT();
-   
-   
+
          //add the token to cookie and send back to user
          res.cookie("token",token,{expires :new Date(Date.now() + 8*3600000)})
-   
-   
-   
-         res.status(200).send("User is valid")
-        }else{
-         throw new Error("invalid credentials")
-        }
-     }else{
-       throw new Error("invalid credentials")
-   
-     }
-    }catch(err){
-     res.status(400).send("ERROR" + err.message)
-    }
-   
-   });
 
+         res.status(200).send("User is valid")
+        }
+
+         
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ message: "Login error", error: err.message });
+    }
+});
 
 //for logout
 authRouter.post('/logout', (req, res) => {

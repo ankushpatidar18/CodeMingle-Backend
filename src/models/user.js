@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
         type : String,
         lowercase : true,
         required : true,
-        unique : true,
+        unique : true, //it will also add indexing(sorted order easy to read difficult to write)
         trim :true,
         immutable:true,
         validate: {
@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema({
     },
     password : {
         type : String,
+        select: false,  // Hides password from query results
         required : true,
         validate(value){
             if(!npm_validator.isStrongPassword(value)){
@@ -46,11 +47,10 @@ const userSchema = new mongoose.Schema({
         type : Number,
         min : 12,
         max : 100,
-        immutable:true,
+        
     },
     gender : {
         type : String,
-        immutable:true,
         enum : ["male","female","other"], 
     },
     photoUrl : {
@@ -80,6 +80,7 @@ const userSchema = new mongoose.Schema({
     }
 
 },{timestamps : true})
+
 
 //creating a helper method for validating password
 userSchema.methods.validatePassword = async function (password){
