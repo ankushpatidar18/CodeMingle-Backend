@@ -7,7 +7,7 @@ const userAuth = async (req,res,next) =>{
    const {token}=cookies;
 
    if(!token){
-    throw new Error("token is not valid");
+      return res.status(401).json({message : "Please Login!"});
    }
 
    const decodedObj = await jwt.verify(token,"CODE@Mingle$$")
@@ -16,13 +16,13 @@ const userAuth = async (req,res,next) =>{
    const user = await User.findById(_id)
 
    if(!user){
-    throw new Error("User not found")
+      return res.status(401).json({message :"User Not Found"});
    }
    //attaching user to next request
    req.user=user;
    next();
    }catch(err){
-    res.status(400).send("ERR " + err.message);
+      return res.status(401).json({message :"Please Login!"});
    }
 
 }

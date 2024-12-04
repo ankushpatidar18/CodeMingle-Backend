@@ -14,7 +14,7 @@ authRouter.post("/signup", async (req, res) => {
     
   
     try {
-      const {emailId,firstName,lastName,password,age,gender,skills}= req.body;
+      const {emailId,firstName,lastName,password,age,gender}= req.body;
     //validation of data(done in schema)
     validation(password);
   
@@ -31,14 +31,18 @@ authRouter.post("/signup", async (req, res) => {
       emailId,
       password : passwordHash,
       age,
-      gender,
-      skills
+      gender
     });
       //returns a promise
-      await user.save();
-      res.send("User created successfully");
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000),
+    });
+
+    res.json({ message: "User Added successfully!", data: savedUser });
     } catch (err) {
-      res.status(400).send("User is not Created because of " + err.message);
+      res.status(401).json({message : err.message });
     }
   });
 
@@ -73,13 +77,13 @@ authRouter.post("/signup", async (req, res) => {
          //add the token to cookie and send back to user
          res.cookie("token",token,{expires :new Date(Date.now() + 8*3600000)})
 
-         res.status(200).send("User is valid")
+         res.send(user);
         }
 
          
     } catch(err) {
         console.error(err);
-        res.status(500).json({ message: "Login error", error: err.message });
+        res.status(500).json({ message: "Login error" + err.message });
     }
 });
 

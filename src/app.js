@@ -6,6 +6,8 @@
 const connectDB = require("./config/database");
 
 const jwt = require("jsonwebtoken");
+const cors = require('cors');
+
 
 
 
@@ -17,6 +19,15 @@ const User = require("./models/user");
 //creating webserver through express.js
 const express = require("express");
 const app = express();
+
+// Enable cross-origin requests
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 
 //middleware for read the json and convert into javascript object
 app.use(express.json());
@@ -36,11 +47,13 @@ app.use("/",requestRouter);
 app.use("/",userRouter);
 
 
+
+
 connectDB()
   .then(() => {
     console.log("database connected");
-    app.listen(3000, () => {
-      console.log("server is listening on port number 3000");
+    app.listen(8080, () => {
+      console.log("server is listening on port number 8080");
     });
   })
   .catch((err) => console.log(err));
