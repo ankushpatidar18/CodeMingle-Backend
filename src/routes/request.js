@@ -45,14 +45,14 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 
         const savedRequest= await connectionRequest.save();
 
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: "Request sent successfully", 
             data: savedRequest 
         });
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 });
 
@@ -73,11 +73,11 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async (req,res)
 
         isConnection.status = status;
         const data = await isConnection.save();
-        res.status(200).json({message: "Connection updated successfully",data:data});
+        return res.status(200).json({message: "Connection updated successfully",data:data});
 
 
     }catch(err){
-        res.status(400).json({message : "Invalid request" });
+       return res.status(400).json({message : "Invalid request" });
     }
 })
 

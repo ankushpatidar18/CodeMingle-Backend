@@ -40,15 +40,16 @@ authRouter.post("/signup", async (req, res) => {
       expires: new Date(Date.now() + 8 * 3600000),
     });
 
-    res.json({ message: "User Added successfully!", data: savedUser });
+    return res.json({ message: "Sign Up successfully!", data: savedUser });
     } catch (err) {
-      res.status(401).json({message : err.message });
+      return res.status(401).json({message : err.message });
     }
   });
 
   //for user login
   authRouter.post("/login", async (req, res) => {
     try {
+        
         const { emailId, password } = req.body;
         
         // Validate input
@@ -77,13 +78,13 @@ authRouter.post("/signup", async (req, res) => {
          //add the token to cookie and send back to user
          res.cookie("token",token,{expires :new Date(Date.now() + 8*3600000)})
 
-         res.send(user);
+         return res.json({message : "Login Successful!",data : user});
         }
 
          
     } catch(err) {
         console.error(err);
-        res.status(500).json({ message: "Login error" + err.message });
+        return res.status(500).json({ message: "Login error" + err.message });
     }
 });
 
@@ -93,7 +94,7 @@ authRouter.post('/logout', (req, res) => {
     expires : new Date(Date.now())
   });
   
-  res.status(200).json({ message: "Logged out successfully" });
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
    

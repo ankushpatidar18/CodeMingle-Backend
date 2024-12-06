@@ -13,9 +13,9 @@ userRouter.get("/user/request/received",userAuth,async (req,res)=>{
             {toUserId : loggedinId,
             status : "interested"}
         ).populate("fromUserId",USER_SAFE_DATA)
-        res.status(200).json({data : receivedRequests});
+        return res.status(200).json({data : receivedRequests});
     }catch(err){
-        res.status(400).json({message : "ERR" + err.message})
+        return res.status(400).json({message : "ERR" + err.message})
     }
 })
 
@@ -35,9 +35,9 @@ userRouter.get("/user/connections",userAuth,async (req,res)=>{
             return connection.fromUserId;
             
         });
-        res.json({data : data});
+        return res.json({data : data});
     }catch(err){
-        res.status(400).json({message : "ERR" + err.message});
+        return res.status(400).json({message : "ERR" + err.message});
     }
 })
 
@@ -73,11 +73,11 @@ userRouter.get("/user/feed",userAuth,async (req,res)=>{
         ]
     }).select(USER_SAFE_DATA).skip(skip).limit(limit);
 
-    res.json({data : users});
+    return res.json({data : users});
 
 
     }catch(err){
-        res.status(400).json({message : "ERR" + err.message});
+        return res.status(400).json({message : "ERR" + err.message});
     }
 })
 

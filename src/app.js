@@ -5,7 +5,7 @@
 //requiring database so that first db connect then server listen
 const connectDB = require("./config/database");
 
-const jwt = require("jsonwebtoken");
+
 const cors = require('cors');
 
 
@@ -14,20 +14,19 @@ const cors = require('cors');
 //for process.env to secure cluster uri
 require("dotenv").config();
 
-const User = require("./models/user");
 
 //creating webserver through express.js
 const express = require("express");
 const app = express();
 
-// Enable cross-origin requests
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: 'http://localhost:5173', // Your frontend's URL
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed methods
+  credentials: true, // Allow cookies/auth headers
+};
 
+app.use(cors(corsOptions)); // Apply CORS middleware
+app.options('*', cors(corsOptions)); // Handle preflight requests
 
 //middleware for read the json and convert into javascript object
 app.use(express.json());
