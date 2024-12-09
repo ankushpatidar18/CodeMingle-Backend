@@ -7,7 +7,7 @@ const requestRouter = express.Router();
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
     try {
         
-        const fromUserId = req.user.id;
+        const fromUserId = req.user._id;
         const toUserId = req.params.toUserId;
         const status = req.params.status;
 
@@ -52,7 +52,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(400).json({ message: "Internal server error" });
     }
 });
 
