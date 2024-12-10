@@ -4,13 +4,15 @@ const User = require("../models/user")
 const userAuth = async (req, res, next) => {
    try {
       const cookies = req.cookies;
+      
       const { token } = cookies;
-
+      
+      
       if (!token) {
          return res.status(401).json({ message: "Please Login!" });
       }
 
-      const decodedObj = await jwt.verify(token, "CODE@Mingle$$")
+      const decodedObj = await jwt.verify(token, process.env.JWT_SECRET)
       const { _id } = decodedObj;
 
       // Explicitly select the password field(select false in user schema)

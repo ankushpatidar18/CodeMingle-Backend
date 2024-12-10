@@ -17,7 +17,7 @@ profileRouter.get("/profile/view",userAuth,async (req,res)=>{
     }
   });
 
-profileRouter.patch("/profile/edit",userAuth,async (req,res)=>{
+profileRouter.post("/profile/edit",userAuth,async (req,res)=>{
   //Work to do here,have to add validation on every field
   try{
     const user = req.user;

@@ -1,103 +1,132 @@
 const mongoose = require("mongoose");
-const npm_validator = require("validator")
-const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
+const validator = require("validator");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-//1.creating user attributes
-//2.adding validation
-
-const userSchema = new mongoose.Schema({
-    firstName : {
-        type : String,
-        required : true,
-        minLength : 1,
-        maxLength : 20,
+const userSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+      minLength: 1,
+      maxLength: 20,
     },
-    lastName : {
-        type : String,
-        minLength : 1,
-        maxLength : 20,
+    emailId: {
+      type: String,
+      lowercase: true,
+      required: true,
+      unique: true,
+      trim: true,
+      immutable: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email!`,
+      },
     },
-    emailId : {
-        type : String,
-        lowercase : true,
-        required : true,
-        unique : true, //it will also add indexing(sorted order easy to read difficult to write)
-        trim :true,
-        immutable:true,
-        validate: {
-            //you can also use npm validator
-            validator: function (value) {
-              return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value); // Simple regex for email format
-            },
-            message: props => `${props.value} is not a valid email!`
-          }
-    },
-    password : {
-        type : String,
-        select: false,  // Hides password from query results
-        required : true,
-        validate(value){
-            if(!npm_validator.isStrongPassword(value)){
-                throw new Error("Password should be strong")
-            }
+    password: {
+      type: String,
+      select: false,
+      required: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error(
+            "Password must contain at least 8 characters, one uppercase letter, one number, and one special character."
+          );
         }
+      },
     },
-    age : {
-        type : Number,
-        min : 12,
-        max : 100,
-        
+    age: {
+      type: Number,
+      min: 12,
+      max: 100,
     },
-    gender : {
-        type : String,
-        enum : ["male","female","other"], 
+    gender: {
+      type: String,
+      required : true,
+      enum: ["male", "female", "other"],
     },
-    photoUrl : {
-        type : String,
-        default : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiibOngFYog5Ri5UoFKH3CsHMOvomBLf4JAw&s',
-        validate(value){
-            if(!npm_validator.isURL(value,{ protocols: ['http','https','ftp'] }))
-            {
-                throw new Error("PhotoUrl should be a valid url")
-            }
+    photoUrl: {
+      type: String,
+      default:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiibOngFYog5Ri5UoFKH3CsHMOvomBLf4JAw&s",
+      validate(value) {
+        if (!validator.isURL(value, { protocols: ["http", "https", "ftp"] })) {
+          throw new Error("PhotoUrl should be a valid URL.");
         }
+      },
     },
-    about : {
-        type : String,
-        minLength:1,
-        maxLength : 50,
-        default : "Write about yourself here!"
+    about: {
+      type: String,
+      minLength: 1,
+      maxLength: 50,
+      default: "Write about yourself here(in 50 words)!",
     },
     skills: {
-        type: [String],
-        validate: {
-            validator: function(value) {
-                return value.length <= 20;
-            },
-            message: 'Too many skills! Maximum allowed is 20.'
-        }
-    }
+      type: [String],
+      required : true,
+      validate: {
+        validator: function (value) {
+          return value.length <= 10;
+        },
+        message: "Too many skills! Maximum allowed is 10.",
+      },
+    },
+    experienceLevel: {
+      type: String,
+      required : true,
+      enum: ["Beginner", "Intermediate", "Expert"],
+    },
+    lookingFor: {
+      type: String,
+      maxLength: 20,
+      default: "Looking for.....",
+    },
+    leetCodeProfile: {
+      type: String,
+      validate: {
+        validator: function (url) {
+          return /^(https?:\/\/)?(www\.)?leetcode\.com\/[a-zA-Z0-9-]+\/?$/.test(
+            url
+          );
+        },
+        message: "Please enter a valid LeetCode profile URL.",
+      },
+    },
+    githubProfile: {
+      type: String,
+      validate: {
+        validator: function (url) {
+          return /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9-]+\/?$/.test(
+            url
+          );
+        },
+        message: "Please enter a valid GitHub profile URL.",
+      },
+    },
+  },
+  { timestamps: true }
+);
 
-},{timestamps : true})
+// // Pre-save hook for hashing password
+// userSchema.pre("save", async function (next) {
+//   if (this.isModified("password")) {
+//     this.password = await bcrypt.hash(this.password, 10);
+//   }
+//   next();
+// });
 
+// Helper method to validate password
+userSchema.methods.validatePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
 
-//creating a helper method for validating password
-userSchema.methods.validatePassword = async function (password){
-    const dbPassword = this.password;
-    const isPasswordValid = await bcrypt.compare(password, dbPassword);
-    return isPasswordValid;
+// Helper method to generate JWT token
+userSchema.methods.getJWT = function () {
+  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+};
 
-}
-
-//creating a helper method for user to generate jwt token
-userSchema.methods.getJWT = async function (){
-    const user = this;
-    const token = await jwt.sign({_id : user._id},"CODE@Mingle$$",{expiresIn : "7d"})
-    return token;
-}
-
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
-

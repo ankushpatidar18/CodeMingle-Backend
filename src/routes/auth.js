@@ -14,7 +14,7 @@ authRouter.post("/signup", async (req, res) => {
     
   
     try {
-      const {emailId,firstName,lastName,password,age,gender}= req.body;
+      const {emailId,fullName,password,gender,experienceLevel,skills}= req.body;
     //validation of data(done in schema)
     validation(password);
   
@@ -26,12 +26,12 @@ authRouter.post("/signup", async (req, res) => {
   
     //creating a new instance of model
     const user = new User({
-      firstName,
-      lastName,
+      fullName,
       emailId,
       password : passwordHash,
-      age,
-      gender
+      gender,
+      experienceLevel,
+      skills
     });
       //returns a promise
     const savedUser = await user.save();
