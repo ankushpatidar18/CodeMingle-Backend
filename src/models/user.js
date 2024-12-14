@@ -78,7 +78,7 @@ const userSchema = new mongoose.Schema(
     },
     lookingFor: {
       type: String,
-      maxLength: 20,
+      maxLength: 50,
       default: "Looking for.....",
     },
     leetCodeProfile: {

@@ -4,15 +4,15 @@ const ConnectionRequestModel = require('../models/connectionRequest');
 const User = require('../models/user');
 const userRouter = express.Router();
 
-const USER_SAFE_DATA = "fullName gender age skills about photoUrl"
-
+const USER_SAFE_DATA_FOR_REQUEST = "fullName photoUrl skills experienceLevel lookingFor about"
+const USER_SAFE_DATA_FOR_FEED = "fullName photoUrl skills experienceLevel lookingFor about leetCodeProfile githubProfile"
 userRouter.get("/user/request/received",userAuth,async (req,res)=>{
     try{
         const loggedinId = req.user._id;
         const receivedRequests = await ConnectionRequestModel.find(
             {toUserId : loggedinId,
             status : "interested"}
-        ).populate("fromUserId",USER_SAFE_DATA)
+        ).populate("fromUserId",USER_SAFE_DATA_FOR_REQUEST)
         return res.status(200).json({data : receivedRequests});
     }catch(err){
         return res.status(400).json({message : "ERR" + err.message})
@@ -26,7 +26,7 @@ userRouter.get("/user/connections",userAuth,async (req,res)=>{
             { $or : [ {toUserId : loggedinId,status : "accepted"},
                 {fromUserId : loggedinId,status : "accepted"}]}
             
-        ).populate("fromUserId",USER_SAFE_DATA).populate("toUserId",USER_SAFE_DATA);
+        ).populate("fromUserId",USER_SAFE_DATA_FOR_REQUEST).populate("toUserId",USER_SAFE_DATA_FOR_REQUEST);
 
         const data = connections.map((connection) => {
             if(connection.fromUserId._id.toString() === loggedinId.toString()){
@@ -71,7 +71,7 @@ userRouter.get("/user/feed",userAuth,async (req,res)=>{
             {_id : { $nin : Array.from(hideUsers)}},
             {_id : {$ne : loggedinUser._id}}
         ]
-    }).select(USER_SAFE_DATA).skip(skip).limit(limit);
+    }).select(USER_SAFE_DATA_FOR_FEED).skip(skip).limit(limit);
 
     return res.json({data : users});
 
