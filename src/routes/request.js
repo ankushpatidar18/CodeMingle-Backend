@@ -32,7 +32,6 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         });
 
         if (existingRequest) {
-            // If request already exists from this user to target user, prevent duplicate
             return res.status(400).json({ message: "Request already sent" });
         }
 

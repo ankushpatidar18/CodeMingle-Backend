@@ -25,7 +25,7 @@ messageRouter.get("/:receiverId",userAuth, async (req, res) => {
 // Save a new message
 messageRouter.post("/", userAuth, async (req, res) => {
     const { receiverId, text } = req.body; // Extract other fields from the request body
-    const senderId = req.user.id; // Assume `userAuth` adds the authenticated user's ID to `req.user`
+    const senderId = req.user.id; 
   
     try {
       const newMessage = new Message({ senderId, receiverId, text });

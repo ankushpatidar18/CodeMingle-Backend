@@ -6,14 +6,14 @@ const http = require("http");
 const { Server } = require("socket.io");
 require("dotenv").config();
 
-// Create express app
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
 // Configure CORS
 const corsOptions = {
-  origin: "http://localhost:5173", // Your React frontend
+  origin: "http://localhost:5173", 
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true, // Allow cookies/auth headers
 };
@@ -70,6 +70,9 @@ io.on("connection", (socket) => {
   });
 });
 
+
+const PORT = process.env.PORT || 8080;
+
 // Routes
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
@@ -87,8 +90,8 @@ app.use("/messages", messageRouter);
 connectDB()
   .then(() => {
     console.log("Database connected");
-    server.listen(8080, () => {
-      console.log("Server is listening on port 8080");
+    server.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}`);
     });
   })
   .catch((err) => console.error("Database connection failed:", err.message));

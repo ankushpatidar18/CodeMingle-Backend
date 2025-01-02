@@ -127,6 +127,10 @@ userSchema.methods.getJWT = function () {
   });
 };
 
+// Add a text index to the 'skills' field for better search performance
+userSchema.index({ skills: "text" });
+
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
